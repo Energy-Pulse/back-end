@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         // Login API එකට authentication අවශ්‍ය නැහැ
-                        .requestMatchers("/users/v1/signup","/users/v1/login").permitAll()
+                        .requestMatchers("/users/v1/signup","/users/v1/login","/contacts/submit").permitAll()
 
                         // Swagger
                         .requestMatchers(
