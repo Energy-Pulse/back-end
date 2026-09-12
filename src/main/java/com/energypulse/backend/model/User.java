@@ -26,7 +26,7 @@ public class User {
     private Long id;
 
     private UUID userId;
-    private String HVACType;
+    private String hvacType;
     private String householdOccupants;
     private String name;
     private String username;

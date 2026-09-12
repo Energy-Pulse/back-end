@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.energypulse.backend.dto.LoginRequest;
+import com.energypulse.backend.dto.LoginResponse;
 import com.energypulse.backend.dto.ReponsePayload;
 import com.energypulse.backend.dto.SignupDto;
 import com.energypulse.backend.service.UserService;
@@ -26,5 +28,11 @@ public class UserController {
     public ResponseEntity<?> createUserAccount(@RequestBody SignupDto signupDto) {
             ReponsePayload payload = userService.createUserAccount(signupDto);
             return ResponseEntity.ok(payload);
+    }
+
+    @PostMapping ("/login")
+    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
+        LoginResponse payload = userService.login(loginRequest);
+        return ResponseEntity.ok(payload);
     }
 }

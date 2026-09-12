@@ -12,7 +12,8 @@ public class SignupDto {
     private String lastName;
     private String email;
     private String password;
-    private String HVACType;
+    private String hvacType;
     private String householdOccupants;
     private String isAgreedToTerms;
 }
+ 
