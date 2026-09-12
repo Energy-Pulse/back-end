@@ -26,13 +26,15 @@ public class User {
     private Long id;
 
     private UUID userId;
+    private String HVACType;
+    private String householdOccupants;
+    private String name;
     private String username;
     private String email;
     private String password;
+    private String isAgreedToTerms;
     private Instant createdAt;
     private Instant updatedAt;
-    private String HVACType;
-    private String householdOccupants;
 
     @PrePersist 
     protected void onCreate() {
