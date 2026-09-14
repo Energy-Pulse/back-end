@@ -1,10 +1,13 @@
 package com.energypulse.backend.ai_module.service;
 
 import com.energypulse.backend.ai_module.dto.*;
+import com.energypulse.backend.ai_module.model.PredictionHistory;
+import com.energypulse.backend.ai_module.repository.PredictionHistoryRepository;
 import com.energypulse.backend.ai_module.utils.ModelType;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import weka.classifiers.Classifier;
 import weka.classifiers.functions.LinearRegression;
 import weka.classifiers.meta.AdditiveRegression;
@@ -13,6 +16,7 @@ import weka.classifiers.trees.RandomForest;
 import weka.core.Instances;
 import weka.core.Randomizable;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -24,6 +28,8 @@ public class MlModelService {
     private final ModelEvaluator evaluator;
 
     private final ElectricityTariffService tariffService;
+
+    private final PredictionHistoryRepository predictionHistoryRepository;
 
     private final Map<ModelType, Classifier> models =
             new EnumMap<>(ModelType.class);
@@ -273,17 +279,36 @@ public class MlModelService {
                         );
     }
 
+    @Transactional
     public PredictionResponse predict(
             PredictionRequest request
     ) throws Exception {
 
+        // ==========================================
+        // 1. Get selected ML model
+        // ==========================================
+
         Classifier model =
                 models.get(bestModel);
+
+        if (model == null) {
+            throw new IllegalStateException(
+                    "ML model not available: " + bestModel
+            );
+        }
+
+        // ==========================================
+        // 2. Create Weka structure
+        // ==========================================
 
         Instances structure =
                 FeatureEngineer.createEmptyDataset(
                         "Prediction"
                 );
+
+        // ==========================================
+        // 3. Transform request into ML instance
+        // ==========================================
 
         var instance =
                 FeatureEngineer.transform(
@@ -291,32 +316,123 @@ public class MlModelService {
                         structure
                 );
 
+        // ==========================================
+        // 4. Make prediction
+        // ==========================================
+
         double prediction =
                 model.classifyInstance(
                         instance
                 );
 
+        // Don't allow negative consumption
         prediction =
                 Math.max(
                         0,
                         prediction
                 );
 
+        // ==========================================
+        // 5. Calculate electricity cost
+        // ==========================================
+
         double cost =
                 tariffService.calculateCost(
                         prediction
                 );
 
+        // ==========================================
+        // 6. Get model R2
+        // ==========================================
+
         double r2 =
                 metrics.get(bestModel)
                         .r2();
 
-        return new PredictionResponse(
-                round(prediction),
-                round(cost),
-                bestModel.name(),
-                round(r2)
+        // ==========================================
+        // 7. Round values
+        // ==========================================
+
+        double roundedPrediction =
+                round(prediction);
+
+        double roundedCost =
+                round(cost);
+
+        double roundedR2 =
+                round(r2);
+
+        // ==========================================
+        // 8. Create API response
+        // ==========================================
+
+        PredictionResponse response =
+                new PredictionResponse(
+                        roundedPrediction,
+                        roundedCost,
+                        bestModel.name(),
+                        roundedR2
+                );
+
+        // ==========================================
+        // 9. SAVE PREDICTION TO DATABASE
+        // ==========================================
+
+        PredictionHistory history =
+                new PredictionHistory();
+
+        // Input values
+        history.setDate(request.date());
+        history.setTime(request.time());
+        history.setDistrict(request.district());
+        history.setProvince(request.province());
+        history.setTemperatureC(request.temperatureC());
+        history.setHumidityPct(request.humidityPct());
+        history.setPreviousConsumptionKwh(
+                request.previousConsumptionKwh()
         );
+        history.setHouseholdSize(
+                request.householdSize()
+        );
+        history.setAcUsage(
+                request.acUsage()
+        );
+        history.setFanUsage(
+                request.fanUsage()
+        );
+
+        // Prediction values
+        history.setPredictedConsumptionKwh(
+                roundedPrediction
+        );
+
+        history.setEstimatedCost(
+                roundedCost
+        );
+
+        history.setSelectedModel(
+                bestModel.name()
+        );
+
+        history.setConfidenceR2(
+                roundedR2
+        );
+
+        // Timestamp
+        history.setCreatedAt(
+                LocalDateTime.now()
+        );
+
+        // Save
+        predictionHistoryRepository.save(
+                history
+        );
+
+        // ==========================================
+        // 10. Return API response
+        // ==========================================
+
+        return response;
     }
 
     public List<ModelEvaluationResponse>

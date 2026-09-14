@@ -33,11 +33,11 @@ public record PredictionRequest(
         int householdSize,
 
         @Min(0)
-        @Max(1)
+        @Max(25)
         int acUsage,
 
         @Min(0)
-        @Max(1)
+        @Max(25)
         int fanUsage
 
 ) {
