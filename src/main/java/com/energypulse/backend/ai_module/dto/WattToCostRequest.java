@@ -1,4 +1,14 @@
 package com.energypulse.backend.ai_module.dto;
 
-public record WattToCostRequest() {
+import jakarta.validation.constraints.Positive;
+
+public record WattToCostRequest(
+
+        @Positive
+        double watts,
+
+        @Positive
+        double hours
+
+) {
 }
