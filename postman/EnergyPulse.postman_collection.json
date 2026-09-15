@@ -1,0 +1,18 @@
+{
+  "info": {
+    "name": "EnergyPulse Backend Coursework",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://localhost:8080/api"},
+    {"key": "token", "value": ""}
+  ],
+  "item": [
+    {"name":"Health","request":{"method":"GET","header":[],"url":{"raw":"{{baseUrl}}/system/health","host":["{{baseUrl}}"],"path":["system","health"]}}},
+    {"name":"ML Status","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{token}}"}],"url":{"raw":"{{baseUrl}}/ml/status","host":["{{baseUrl}}"],"path":["ml","status"]}}},
+    {"name":"Dataset Profile","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{token}}"}],"url":{"raw":"{{baseUrl}}/ml/dataset-profile","host":["{{baseUrl}}"],"path":["ml","dataset-profile"]}}},
+    {"name":"Model Evaluation","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{token}}"}],"url":{"raw":"{{baseUrl}}/ml/evaluation","host":["{{baseUrl}}"],"path":["ml","evaluation"]}}},
+    {"name":"Feature Engineering","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{token}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"date\": \"2025-08-20\",\n  \"time\": \"20:00:00\",\n  \"district\": \"Kegalle\",\n  \"province\": \"Sabaragamuwa\",\n  \"temperatureC\": 29.5,\n  \"humidityPct\": 76.0,\n  \"previousConsumptionKwh\": 2.05,\n  \"householdSize\": 5,\n  \"acUsage\": 1,\n  \"fanUsage\": 0,\n  \"workFromHome\": 0\n}"},"url":{"raw":"{{baseUrl}}/ml/feature-engineering","host":["{{baseUrl}}"],"path":["ml","feature-engineering"]}}},
+    {"name":"Predict","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{token}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"date\": \"2025-08-20\",\n  \"time\": \"20:00:00\",\n  \"district\": \"Kegalle\",\n  \"province\": \"Sabaragamuwa\",\n  \"temperatureC\": 29.5,\n  \"humidityPct\": 76.0,\n  \"previousConsumptionKwh\": 2.05,\n  \"householdSize\": 5,\n  \"acUsage\": 1,\n  \"fanUsage\": 0,\n  \"workFromHome\": 0\n}"},"url":{"raw":"{{baseUrl}}/ml/predict","host":["{{baseUrl}}"],"path":["ml","predict"]}}}
+  ]
+}
