@@ -17,4 +17,7 @@ public interface PredictionHistoryRepository
     List<PredictionHistory> findByProvinceOrderByCreatedAtDesc(
             String province
     );
+
+//    List<PredictionHistory> findAllByUserIdOrderByCreatedAtDesc(Long userId);
+List<PredictionHistory> findAllByUserOrderByCreatedAtDesc(Long userId);
 }
