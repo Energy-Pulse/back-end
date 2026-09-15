@@ -1,14 +1,10 @@
 package com.energypulse.backend.ai_module.dto;
 
 public record CostToConsumptionResponse(
-
-        double amount,
-
+        double amountLkr,
         double estimatedConsumptionKwh,
-
         double estimatedAverageWatts,
-
-        double usageHours
-
-) {
-}
+        double usageHours,
+        double tariffRateLkrPerKwh,
+        String currency
+) {}
