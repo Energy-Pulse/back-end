@@ -1,24 +1,31 @@
 spring:
   application:
-    name: backend
+    name: energypulse-backend
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/energy_pulse
-    username: postgres
-    password: 1234
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/energy_pulse}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:1234}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: ${SHOW_SQL:false}
+    open-in-view: false
     properties:
       hibernate:
         format_sql: true
 
 server:
+  port: ${SERVER_PORT:8080}
   servlet:
     context-path: /api
+
+energy:
+  tariff:
+    # Application planning rate; not a government tariff table.
+    rate-lkr-per-kwh: ${ENERGY_RATE_LKR_PER_KWH:12.00}
 
 springdoc:
   api-docs:
@@ -27,5 +34,9 @@ springdoc:
     path: /swagger-ui.html
 
 jwt:
-  secret: "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="
-  expiration: 86400000
+  secret: ${JWT_SECRET:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
