@@ -1,16 +1,10 @@
 package com.energypulse.backend.controller;
 
+import com.energypulse.backend.dto.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
-import com.energypulse.backend.dto.LoginRequest;
-import com.energypulse.backend.dto.LoginResponse;
-import com.energypulse.backend.dto.ReponsePayload;
-import com.energypulse.backend.dto.SignupDto;
 import com.energypulse.backend.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -35,5 +29,31 @@ public class UserController {
     public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
         LoginResponse payload = userService.login(loginRequest);
         return ResponseEntity.ok(payload);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getCurrentUser(
+            Authentication authentication
+    ) {
+
+        UserResponse response =
+                userService.getCurrentUser(authentication);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<UserResponse> updateCurrentUser(
+            Authentication authentication,
+            @RequestBody UpdateUserRequest request
+    ) {
+
+        UserResponse response =
+                userService.updateCurrentUser(
+                        authentication,
+                        request
+                );
+
+        return ResponseEntity.ok(response);
     }
 }

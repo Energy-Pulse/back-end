@@ -1,18 +1,17 @@
 package com.energypulse.backend.service;
 
+import com.energypulse.backend.dto.*;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.energypulse.backend.dto.LoginRequest;
-import com.energypulse.backend.dto.LoginResponse;
-import com.energypulse.backend.dto.ReponsePayload;
-import com.energypulse.backend.dto.SignupDto;
 import com.energypulse.backend.model.User;
 import com.energypulse.backend.repository.UserRepository;
 import com.energypulse.backend.security.JwtService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor  
@@ -21,6 +20,78 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+
+    @Transactional(readOnly = true)
+    public UserResponse getCurrentUser(Authentication authentication) {
+
+        User user = getAuthenticatedUser(authentication);
+
+        return mapToResponse(user);
+    }
+
+    @Transactional
+    public UserResponse updateCurrentUser(
+            Authentication authentication,
+            UpdateUserRequest request
+    ) {
+
+        User user = getAuthenticatedUser(authentication);
+
+        if (request.getHvacType() != null) {
+            user.setHvacType(request.getHvacType());
+        }
+
+        if (request.getHouseholdOccupants() != null) {
+            user.setHouseholdOccupants(request.getHouseholdOccupants());
+        }
+
+        if (request.getName() != null) {
+            user.setName(request.getName());
+        }
+
+        if (request.getUsername() != null) {
+            user.setUsername(request.getUsername());
+        }
+
+        if (request.getEmail() != null) {
+            user.setEmail(request.getEmail());
+        }
+
+        if (request.getIsAgreedToTerms() != null) {
+            user.setIsAgreedToTerms(request.getIsAgreedToTerms());
+        }
+
+        user.setUpdatedAt(java.time.Instant.now());
+
+        User updatedUser = userRepository.save(user);
+
+        return mapToResponse(updatedUser);
+    }
+
+    private User getAuthenticatedUser(Authentication authentication) {
+
+        String username = authentication.getName();
+
+        return userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new RuntimeException("Authenticated user not found")
+                );
+    }
+
+    private UserResponse mapToResponse(User user) {
+
+        return UserResponse.builder()
+                .userId(user.getUserId())
+                .hvacType(user.getHvacType())
+                .householdOccupants(user.getHouseholdOccupants())
+                .name(user.getName())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .isAgreedToTerms(user.getIsAgreedToTerms())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .build();
+    }
 
     public ReponsePayload createUserAccount(SignupDto signupDto) {
 
