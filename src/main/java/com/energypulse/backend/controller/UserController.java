@@ -31,29 +31,4 @@ public class UserController {
         return ResponseEntity.ok(payload);
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<UserResponse> getCurrentUser(
-            Authentication authentication
-    ) {
-
-        UserResponse response =
-                userService.getCurrentUser(authentication);
-
-        return ResponseEntity.ok(response);
-    }
-
-    @PutMapping("/me")
-    public ResponseEntity<UserResponse> updateCurrentUser(
-            Authentication authentication,
-            @RequestBody UpdateUserRequest request
-    ) {
-
-        UserResponse response =
-                userService.updateCurrentUser(
-                        authentication,
-                        request
-                );
-
-        return ResponseEntity.ok(response);
-    }
 }

@@ -3,9 +3,12 @@ package com.energypulse.backend.ai_module.controller;
 import com.energypulse.backend.ai_module.dto.*;
 import com.energypulse.backend.ai_module.model.PredictionHistory;
 import com.energypulse.backend.ai_module.service.MlModelService;
+import com.energypulse.backend.dto.ReponsePayload;
+import com.energypulse.backend.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +19,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MlController {
     private final MlModelService mlModelService;
+    private final UserService userService;
 
     @PostMapping("/predict")
     public ResponseEntity<PredictionResponse> predict(@Valid @RequestBody PredictionRequest request) throws Exception {
@@ -63,5 +67,27 @@ public class MlController {
     @GetMapping("/history/{userId}")
     public ResponseEntity<List<PredictionHistory>> historyByUserId(@PathVariable UUID userId) {
         return ResponseEntity.ok(mlModelService.getPredictionHistoryByUserId(userId));
+    }
+
+    @GetMapping("/me/{userId}")
+    public ResponseEntity<ReponsePayload> getUserDetails(@PathVariable UUID userId) {
+        try {
+
+            if (userId == null) {
+                return ResponseEntity.status(404).body(ReponsePayload.builder()
+                        .status(org.springframework.http.HttpStatus.NOT_FOUND)
+                        .message("User not found")
+                        .build());
+            }
+            
+            ReponsePayload payload = userService.getUserDetails(userId);
+            return ResponseEntity.ok(payload);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(ReponsePayload.builder()
+                    .status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                    .message("An error occurred while fetching user details: " + e.getMessage())
+                    .build());
+        }
     }
 }

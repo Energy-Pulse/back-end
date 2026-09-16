@@ -13,6 +13,8 @@ import com.energypulse.backend.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor  
 public class UserService {
@@ -21,77 +23,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    @Transactional(readOnly = true)
-    public UserResponse getCurrentUser(Authentication authentication) {
 
-        User user = getAuthenticatedUser(authentication);
-
-        return mapToResponse(user);
-    }
-
-    @Transactional
-    public UserResponse updateCurrentUser(
-            Authentication authentication,
-            UpdateUserRequest request
-    ) {
-
-        User user = getAuthenticatedUser(authentication);
-
-        if (request.getHvacType() != null) {
-            user.setHvacType(request.getHvacType());
-        }
-
-        if (request.getHouseholdOccupants() != null) {
-            user.setHouseholdOccupants(request.getHouseholdOccupants());
-        }
-
-        if (request.getName() != null) {
-            user.setName(request.getName());
-        }
-
-        if (request.getUsername() != null) {
-            user.setUsername(request.getUsername());
-        }
-
-        if (request.getEmail() != null) {
-            user.setEmail(request.getEmail());
-        }
-
-        if (request.getIsAgreedToTerms() != null) {
-            user.setIsAgreedToTerms(request.getIsAgreedToTerms());
-        }
-
-        user.setUpdatedAt(java.time.Instant.now());
-
-        User updatedUser = userRepository.save(user);
-
-        return mapToResponse(updatedUser);
-    }
-
-    private User getAuthenticatedUser(Authentication authentication) {
-
-        String username = authentication.getName();
-
-        return userRepository.findByUsername(username)
-                .orElseThrow(() ->
-                        new RuntimeException("Authenticated user not found")
-                );
-    }
-
-    private UserResponse mapToResponse(User user) {
-
-        return UserResponse.builder()
-                .userId(user.getUserId())
-                .hvacType(user.getHvacType())
-                .householdOccupants(user.getHouseholdOccupants())
-                .name(user.getName())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .isAgreedToTerms(user.getIsAgreedToTerms())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .build();
-    }
 
     public ReponsePayload createUserAccount(SignupDto signupDto) {
 
@@ -154,4 +86,53 @@ public class UserService {
     }
 
 
+    public UUID getUserIdByEmail(String email) {
+        try {
+            User user = userRepository.findByEmail(email)
+                    .orElse(null);
+            return user != null ? user.getUserId() : null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public ReponsePayload getUserDetails(UUID userId) {
+
+        try {
+
+            User user = userRepository.findByUserId(userId);
+
+            if (user == null) {
+                return ReponsePayload.builder()
+                        .status(HttpStatus.NOT_FOUND)
+                        .message("User not found.")
+                        .build();
+            }
+
+            UserResponse userResponse = UserResponse.builder()
+                    .userId(user.getUserId())
+                    .hvacType(user.getHvacType())
+                    .householdOccupants(user.getHouseholdOccupants())
+                    .name(user.getName())
+                    .username(user.getUsername())
+                    .email(user.getEmail())
+                    .isAgreedToTerms(user.getIsAgreedToTerms())
+                    .createdAt(user.getCreatedAt())
+                    .updatedAt(user.getUpdatedAt())
+                    .build();
+
+            return ReponsePayload.builder()
+                    .status(HttpStatus.OK)
+                    .data(userResponse)
+                    .message("User details retrieved successfully.")
+                    .build();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            throw new RuntimeException(e);
+        }
+    }
 }
