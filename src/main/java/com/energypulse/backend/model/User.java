@@ -31,15 +31,18 @@ public class User {
     private String name;
     private String username;
     private String email;
+    private String contact;
     private String password;
     private String isAgreedToTerms;
     private Instant createdAt;
     private Instant updatedAt;
+    private String status;
 
     @PrePersist 
     protected void onCreate() {
         createdAt = Instant.now();
         updatedAt = Instant.now();
         userId = UUID.randomUUID();
+        status = "ACTIVE";
     }
 }

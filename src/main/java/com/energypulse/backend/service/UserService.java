@@ -135,4 +135,65 @@ public class UserService {
             throw new RuntimeException(e);
         }
     }
+
+    public ReponsePayload deleteUserAccount(UUID id) {
+        
+        try {
+            User user = userRepository.findByUserId(id);
+
+            if (user == null) {
+                return ReponsePayload.builder()
+                        .status(HttpStatus.NOT_FOUND)
+                        .message("User not found.")
+                        .build();
+            }
+            user.setStatus("DELETED");
+            userRepository.save(user);
+
+            return ReponsePayload.builder()
+                    .status(HttpStatus.OK)
+                    .message("User account deleted successfully.")
+                    .build();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ReponsePayload updateUserAccount(UUID id, UpdateUserRequest updateUserRequest) {
+        
+        try {
+            User user = userRepository.findByUserId(id);
+
+            if (user == null) {
+                return ReponsePayload.builder()
+                        .status(HttpStatus.NOT_FOUND)
+                        .message("User not found.")
+                        .build();
+            }
+
+            // Update the user fields with the new values from updateUserRequest
+            user.setName(updateUserRequest.getName());
+            user.setUsername(updateUserRequest.getUsername());
+            user.setEmail(updateUserRequest.getEmail());
+            user.setContact(updateUserRequest.getContact());
+
+            // Save the updated user back to the repository
+            userRepository.save(user);
+
+            return ReponsePayload.builder()
+                    .status(HttpStatus.OK)
+                    .message("User account updated successfully.")
+                    .build();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -10,11 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateUserRequest {
-
-    private String hvacType;
-    private String householdOccupants;
     private String name;
     private String username;
     private String email;
-    private String isAgreedToTerms;
+    private String contact;
 }
