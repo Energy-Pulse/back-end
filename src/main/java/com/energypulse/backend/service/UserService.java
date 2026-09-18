@@ -61,6 +61,10 @@ public class UserService {
                         new RuntimeException("Invalid email or password")
                 );
 
+                if (!user.getStatus().equals("ACTIVE")) {
+                    throw new RuntimeException("User account is not active");
+                }
+
         if (!passwordEncoder.matches(
                 request.getPassword(),
                 user.getPassword())) {
